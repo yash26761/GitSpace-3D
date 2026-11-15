@@ -7,30 +7,42 @@ import { PlanetSurfaceShader, AtmosphereGlowShader } from "./PlanetaryShaders";
 
 export interface PlanetProps {
   name: string;
+  fullName?: string;
+  planetClass?: string;
   radius?: number;
   orbitalRadius: number;
   orbitalSpeed: number;
   initialAngle?: number;
+  rotationSpeed?: number;
   colorBase?: string;
   colorSurface?: string;
   colorAtmosphere?: string;
+  noiseScale?: number;
+  roughness?: number;
+  atmospherePower?: number;
   axialTilt?: number;
   hasRing?: boolean;
   ringInnerRadius?: number;
   ringOuterRadius?: number;
   ringColor?: string;
+  activityScore?: number;
   onSelect?: (name: string) => void;
 }
 
 export function PlanetMesh({
   name,
+  fullName,
   radius = 1.0,
   orbitalRadius,
   orbitalSpeed,
   initialAngle = 0,
+  rotationSpeed = 0.6,
   colorBase = "#0f172a",
   colorSurface = "#06b6d4",
   colorAtmosphere = "#22d3ee",
+  noiseScale = 3.5,
+  roughness = 0.4,
+  atmospherePower = 2.8,
   axialTilt = 0.2,
   hasRing = false,
   ringInnerRadius = 1.3,
@@ -53,12 +65,12 @@ export function PlanetMesh({
         uColorSurface: { value: new THREE.Color(colorSurface) },
         uColorAtmosphere: { value: new THREE.Color(colorAtmosphere) },
         uLightPosition: { value: new THREE.Vector3(0, 0, 0) },
-        uNoiseScale: { value: 3.5 },
-        uAtmospherePower: { value: 2.8 },
-        uRoughness: { value: 0.4 },
+        uNoiseScale: { value: noiseScale },
+        uAtmospherePower: { value: atmospherePower },
+        uRoughness: { value: roughness },
       },
     });
-  }, [colorBase, colorSurface, colorAtmosphere]);
+  }, [colorBase, colorSurface, colorAtmosphere, noiseScale, roughness, atmospherePower]);
 
   // Atmosphere Glow Shader Material memoization
   const atmosphereMaterial = useMemo(() => {
@@ -92,7 +104,7 @@ export function PlanetMesh({
 
     // 2. Axial Spin
     if (planetMeshRef.current) {
-      planetMeshRef.current.rotation.y = elapsed * 0.6;
+      planetMeshRef.current.rotation.y = elapsed * rotationSpeed;
     }
 
     // 3. Update Shader Uniforms
@@ -111,7 +123,7 @@ export function PlanetMesh({
           material={surfaceMaterial}
           onClick={(e) => {
             e.stopPropagation();
-            onSelect?.(name);
+            onSelect?.(fullName || name);
           }}
           onPointerOver={(e) => {
             e.stopPropagation();

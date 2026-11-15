@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test tests/api-cache.test.mjs tests/visual-dna.test.mjs tests/github-slug.test.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

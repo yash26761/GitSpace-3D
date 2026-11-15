@@ -3,12 +3,35 @@
 import React, { useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { UniverseScene } from "./UniverseScene";
+import { PlanetaryVisualDNA } from "@/lib/types";
 import { Orbit, Compass, Zap, ShieldCheck, AlertTriangle } from "lucide-react";
 
-export function UniverseCanvas() {
-  const [selectedPlanet, setSelectedPlanet] = useState<string>("facebook/react");
+interface UniverseCanvasProps {
+  planets?: PlanetaryVisualDNA[];
+  selectedPlanetName?: string;
+  onSelectPlanet?: (name: string) => void;
+}
+
+export function UniverseCanvas({
+  planets,
+  selectedPlanetName,
+  onSelectPlanet,
+}: UniverseCanvasProps) {
+  const [localSelected, setLocalSelected] = useState<string>("facebook/react");
   const [isWebGLSupported, setIsWebGLSupported] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const activeSelectedName = selectedPlanetName || localSelected;
+
+  // Find active planet metadata if available
+  const activePlanet = planets?.find(
+    (p) => p.fullName === activeSelectedName || p.name === activeSelectedName
+  );
+
+  const handleSelect = (name: string) => {
+    setLocalSelected(name);
+    onSelectPlanet?.(name);
+  };
 
   useEffect(() => {
     // Empirical WebGL 2.0 / WebGL Availability Check
@@ -64,7 +87,10 @@ export function UniverseCanvas() {
         className="w-full h-full cursor-grab active:cursor-grabbing"
       >
         <color attach="background" args={["#030712"]} />
-        <UniverseScene onSelectPlanet={(name) => setSelectedPlanet(name)} />
+        <UniverseScene
+          planets={planets}
+          onSelectPlanet={handleSelect}
+        />
       </Canvas>
 
       {/* Interactive HUD Overlay: Top Left Controls */}
@@ -95,14 +121,16 @@ export function UniverseCanvas() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-white tracking-wide">
-                Target: {selectedPlanet}
+                Target: {activeSelectedName}
               </span>
               <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-md bg-nebula-500/20 text-nebula-300 border border-nebula-500/30">
-                Procedural Mesh
+                {activePlanet ? activePlanet.planetClass : "Procedural Mesh"}
               </span>
             </div>
             <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-              Click any celestial body to focus and inspect Keplerian dynamics
+              {activePlanet
+                ? `Radius: ${activePlanet.radius} • Orbit: ${activePlanet.orbitalRadius} AU • Activity: ${Math.round(activePlanet.activityScore * 100)}%`
+                : "Click any celestial body to focus and inspect Keplerian dynamics"}
             </p>
           </div>
         </div>
@@ -111,8 +139,9 @@ export function UniverseCanvas() {
           <div className="px-3 py-1.5 rounded-xl bg-space-900 border border-slate-800 text-slate-300">
             Rayleigh Atmosphere: Active
           </div>
-          <div className="px-3 py-1.5 rounded-xl bg-space-900 border border-slate-800 text-supernova-400">
-            Zero Code Storage
+          <div className="px-3 py-1.5 rounded-xl bg-space-900 border border-slate-800 text-supernova-400 flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Zero Code Storage</span>
           </div>
         </div>
       </div>

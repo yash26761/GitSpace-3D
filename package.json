@@ -7,7 +7,9 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test tests/api-cache.test.mjs tests/visual-dna.test.mjs tests/github-slug.test.mjs"
+    "test": "node --test tests/api-cache.test.mjs tests/visual-dna.test.mjs tests/github-slug.test.mjs",
+    "test:e2e": "playwright test",
+    "test:all": "npm test && npm run test:e2e"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
@@ -20,6 +22,7 @@
     "three": "^0.187.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
